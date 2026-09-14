@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>패혈증 조기 경고 시스템 v4.0</title>
+<style>
+:root{
+  --bg:#f5f7fb;--panel:#fff;--text:#1f2937;--muted:#6b7280;--line:#e5e7eb;--soft:#f3f4f6;
+  --blue:#2563eb;--green:#10b981;--amber:#f59e0b;--red:#dc2626;--purple:#7c3aed;
+}
+body.dark{
+  --bg:#111827;--panel:#1f2937;--text:#f9fafb;--muted:#9ca3af;--line:#374151;--soft:#273449;
+  --blue:#60a5fa;--green:#34d399;--amber:#fbbf24;--red:#f87171;--purple:#a78bfa;
+}
+*{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Noto Sans KR",sans-serif;transition:.2s}
+.container{max-width:1780px;margin:auto;padding:20px}.header{display:flex;justify-content:space-between;gap:16px;align-items:flex-start;border-bottom:2px solid var(--line);padding-bottom:16px;margin-bottom:18px}.header h1{font-size:27px;margin:0 0 6px}.header p{margin:0;color:var(--muted);font-size:14px}.header-actions{display:flex;gap:8px;flex-wrap:wrap}
+button,input,select{font:inherit}.btn{border:1px solid var(--line);background:var(--panel);color:var(--text);padding:8px 11px;border-radius:8px;cursor:pointer;font-size:12px;font-weight:700}.btn:hover{filter:brightness(.97)}.btn-primary{background:var(--blue);border-color:var(--blue);color:white}.btn-success{background:var(--green);border-color:var(--green);color:white}.btn-danger{background:var(--red);border-color:var(--red);color:white}.btn-ghost{background:var(--soft)}
+.toolbar{display:flex;justify-content:space-between;align-items:center;gap:12px;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin-bottom:16px}.toolbar-left,.toolbar-right{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.toolbar input,.toolbar select{border:1px solid var(--line);background:var(--panel);color:var(--text);border-radius:7px;padding:8px 9px;font-size:12px}.update-time{font-size:12px;color:var(--muted)}
+.main-grid{display:grid;grid-template-columns:245px minmax(0,1fr) 330px;gap:18px}.card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:16px;box-shadow:0 1px 2px rgba(0,0,0,.03)}.card h3{font-size:14px;margin:0 0 12px}.patient-list{max-height:760px;overflow:auto}.patient-button{width:100%;border:1px solid var(--line);background:var(--soft);color:var(--text);padding:10px;margin-bottom:8px;border-radius:8px;text-align:left;cursor:pointer}.patient-button.active{border-color:var(--blue);outline:2px solid color-mix(in srgb,var(--blue) 18%, transparent)}.patient-top{display:flex;justify-content:space-between;gap:8px;align-items:center}.patient-name{font-weight:700;font-size:13px}.patient-info{font-size:11px;color:var(--muted);margin-top:4px}.badge{font-size:10px;font-weight:800;padding:3px 6px;border-radius:99px;color:#fff}.danger{background:var(--red)}.warning{background:var(--amber)}.success{background:var(--green)}.trend-up{color:var(--red);font-weight:800;font-size:10px;margin-left:5px}
+.patient-head{display:flex;justify-content:space-between;align-items:center;gap:12px}.patient-head h2{font-size:17px;margin:0 0 3px}.patient-head p{font-size:12px;color:var(--muted);margin:0}.score-wrap{display:grid;grid-template-columns:1.1fr 1fr;gap:14px;margin-top:14px}.score-box{background:var(--soft);border-radius:10px;padding:20px;text-align:center}.score-label{font-size:12px;color:var(--muted);font-weight:700}.score-value{font-size:60px;line-height:1;font-weight:800;margin:8px 0}.score-change{font-size:12px;font-weight:800}.status-indicator{display:inline-block;margin-top:8px;color:#fff;padding:7px 11px;border-radius:7px;font-size:12px;font-weight:800}.reason-box{border:1px solid var(--line);border-radius:10px;padding:14px}.reason-box h4{margin:0 0 9px;font-size:13px}.reason-list{margin:0;padding-left:18px}.reason-list li{margin:7px 0;font-size:12px;line-height:1.45}.ai-note{font-size:11px;color:var(--muted);margin-top:10px;line-height:1.4}
+.vitals-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:10px}.vital-card{background:var(--soft);border-radius:8px;padding:12px;text-align:center;border:1px solid transparent}.vital-card.abnormal{border-color:var(--amber)}.vital-label{font-size:11px;color:var(--muted);font-weight:700}.vital-value{font-size:18px;font-weight:800;margin-top:5px}.vital-range{font-size:9px;color:var(--muted);margin-top:3px}
+.chart-tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}.tab{border:1px solid var(--line);background:var(--soft);color:var(--text);padding:6px 9px;border-radius:6px;font-size:11px;cursor:pointer}.tab.active{background:var(--blue);color:white;border-color:var(--blue)}.chart-wrap{height:270px;border:1px solid var(--line);border-radius:8px;background:var(--soft);padding:10px;position:relative}.chart-wrap svg{width:100%;height:100%}.chart-legend{display:flex;justify-content:space-between;font-size:10px;color:var(--muted);margin-top:4px}
+.guide{padding:13px;border-radius:9px;border:1px solid var(--line);background:var(--soft);margin-top:12px}.guide strong{font-size:13px}.guide p{font-size:12px;line-height:1.5;margin:7px 0 0}
+.action-box{margin-top:12px;padding:13px;border-radius:9px;border:1px solid var(--line);background:var(--soft);border-left:4px solid var(--line)}.action-box.danger{border-left-color:var(--red)}.action-box.warning{border-left-color:var(--amber)}.action-box.success{border-left-color:var(--green)}.action-box h4{margin:0 0 9px;font-size:13px}.action-box ul{margin:0;padding-left:0;list-style:none}.action-box li{font-size:12px;line-height:1.6;padding-left:20px;position:relative;margin:5px 0}.action-box li::before{content:'✓';position:absolute;left:0;font-weight:800}.action-box.danger li::before{color:var(--red)}.action-box.warning li::before{color:var(--amber)}.action-box.success li::before{color:var(--green)}
+.shap-row{display:grid;grid-template-columns:70px 1fr 42px;gap:8px;align-items:center;margin:9px 0;font-size:11px}.bar-bg{height:19px;background:var(--soft);border-radius:5px;overflow:hidden;border:1px solid var(--line)}.bar-fill{height:100%;background:var(--blue)}.shap-val{text-align:right;font-weight:700}.side-section{margin-bottom:18px}.mini-title{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}.mini-title h3{margin:0}.alarm-list{max-height:250px;overflow:auto}.alarm{border-left:4px solid var(--blue);background:var(--soft);border-radius:6px;padding:9px;margin-bottom:7px}.alarm.danger-border{border-left-color:var(--red)}.alarm.warning-border{border-left-color:var(--amber)}.alarm.success-border{border-left-color:var(--green)}.alarm-head{display:flex;justify-content:space-between;gap:8px;font-size:10px}.alarm-msg{font-size:11px;margin:5px 0}.alarm-actions{display:flex;justify-content:flex-end}.ack{border:none;background:transparent;color:var(--blue);font-size:10px;cursor:pointer;font-weight:800}.acked{opacity:.55}
+.bottom-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:18px}.feedback-group{display:flex;gap:8px}.feedback-group input{flex:1;border:1px solid var(--line);background:var(--panel);color:var(--text);padding:9px;border-radius:7px;font-size:12px}.feedback-item{background:var(--soft);border-radius:6px;padding:9px;margin-top:7px;font-size:11px}.feedback-meta{color:var(--muted);font-size:10px;margin-bottom:3px}.footer{margin-top:18px;background:var(--soft);color:var(--muted);border:1px solid var(--line);padding:11px;border-radius:8px;text-align:center;font-size:11px}.empty{font-size:12px;color:var(--muted);padding:14px 4px;text-align:center}
+@media(max-width:1250px){.main-grid{grid-template-columns:220px 1fr}.main-grid>.card:last-child{grid-column:1/-1}.vitals-grid{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:850px){.main-grid,.bottom-grid,.score-wrap{grid-template-columns:1fr}.vitals-grid{grid-template-columns:repeat(2,1fr)}.header{flex-direction:column}.toolbar{align-items:flex-start;flex-direction:column}}
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <div><h1>패혈증 조기 경고 시스템 v4.0</h1><p>의료진용 실시간 모니터링 · 설명 가능한 위험도 분석 · 교육용 프로토타입</p></div>
+    <div class="header-actions"><button class="btn" id="themeBtn" onclick="toggleTheme()">🌙 다크모드</button><button class="btn btn-primary" onclick="refreshData(true)">↻ 데이터 갱신</button></div>
+  </div>
+
+  <div class="toolbar">
+    <div class="toolbar-left">
+      <input id="searchInput" placeholder="환자명 / 병실 검색" oninput="renderPatientList()" />
+      <select id="sortSelect" onchange="renderPatientList()"><option value="risk">위험도 높은 순</option><option value="rise">급상승 우선</option><option value="room">병실 순</option></select>
+      <select id="statusFilterSelect" onchange="renderPatientList()"><option value="전체">전체 등급</option><option value="위험">위험만</option><option value="주의">주의만</option><option value="정상">정상만</option></select>
+      <label style="font-size:12px;color:var(--muted)"><input type="checkbox" id="autoRefresh" checked onchange="setAutoRefresh()" /> 자동 갱신</label>
+      <select id="intervalSelect" onchange="setAutoRefresh()"><option value="30">30초</option><option value="60">60초</option><option value="120">2분</option></select>
+    </div>
+    <div class="toolbar-right"><span class="update-time" id="updateTime">마지막 업데이트: -</span></div>
+  </div>
+
+  <div class="main-grid">
+    <div class="card patient-list"><h3>ICU 환자 우선순위</h3><div id="patientList"></div></div>
+
+    <div>
+      <div class="card">
+        <div class="patient-head"><div><h2 id="patientName"></h2><p id="patientInfo"></p></div><span class="badge" id="priorityBadge"></span></div>
+        <div class="score-wrap">
+          <div class="score-box"><div class="score-label">패혈증 위험도 스코어</div><div><span class="score-value" id="riskScore">0</span><span style="font-size:19px;font-weight:800">%</span></div><div class="score-change" id="scoreChange"></div><div class="status-indicator" id="statusIndicator"></div></div>
+          <div class="reason-box"><h4>⚠️ 위험도 상승 주요 원인</h4><ul class="reason-list" id="reasonList"></ul><div class="ai-note">AI가 단순히 위험 점수만 제시하는 것이 아니라, 어떤 생체신호가 위험도 상승에 영향을 주었는지 설명하도록 설계했습니다.</div></div>
+        </div>
+        <div class="guide" id="guideBox"></div>
+        <div class="action-box" id="actionBox"></div>
+      </div>
+
+      <div class="card" style="margin-top:18px"><h3>실시간 생체신호</h3><div class="vitals-grid" id="vitalsGrid"></div></div>
+
+      <div class="card" style="margin-top:18px">
+        <h3>24시간 변화 추이</h3>
+        <div class="chart-tabs" id="chartTabs"></div>
+        <div class="chart-wrap"><svg id="trendSvg" viewBox="0 0 900 250" preserveAspectRatio="none"></svg></div>
+        <div class="chart-legend"><span>24시간 전</span><span id="chartLabel">현재</span><span>현재</span></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="side-section"><h3>변수 영향도 (SHAP 형태)</h3><div id="shapAnalysis"></div><div class="ai-note">※ 데모에서는 임상 AI 모델 대신 규칙 기반 위험도와 모의 영향도를 사용합니다.</div></div>
+      <div class="side-section"><div class="mini-title"><h3>알람 로그</h3><button class="btn btn-ghost" onclick="addManualAlarm()">+ 테스트 알람</button></div><div class="alarm-list" id="alarmList"></div></div>
+    </div>
+  </div>
+
+  <div class="bottom-grid">
+    <div class="card"><h3>의료진 피드백</h3><div class="feedback-group"><input id="feedbackInput" placeholder="환자 상태에 대한 피드백을 입력하세요" onkeydown="if(event.key==='Enter')addFeedback()" /><button class="btn btn-success" onclick="addFeedback()">저장</button></div><div id="feedbackList"></div></div>
+    <div class="card"><h3>시스템 설명</h3><div style="font-size:12px;line-height:1.7;color:var(--muted)">이 프로토타입은 환자의 생체신호 변화를 기반으로 위험도를 계산하고, 위험 상승의 주요 원인을 자연어로 설명하며, 위험도가 높은 환자를 우선 표시합니다. 실제 진단이나 치료 결정을 대신하지 않으며 설계 과목 시연을 위한 교육용 시스템입니다.</div></div>
+  </div>
+  <div class="footer">교육용 데모 • 시뮬레이션 데이터 사용 • 의료 진단/치료 용도 아님</div>
+</div>
+<script>
+const ranges={temperature:[36.0,37.5],heartRate:[60,100],respRate:[12,20],sysBloodPress:[90,140],spO2:[95,100]};
+const labels={risk:'위험도',temperature:'체온',heartRate:'심박수',respRate:'호흡수',sysBloodPress:'수축기 혈압',spO2:'SpO₂'};
+const units={temperature:'°C',heartRate:' bpm',respRate:'/min',sysBloodPress:' mmHg',spO2:'%'};
+const patients=[
+{id:'P001',name:'김철수',age:68,gender:'남',room:'ICU-101',base:{temperature:38.1,heartRate:106,respRate:23,sysBloodPress:101,spO2:94}},
+{id:'P002',name:'이영희',age:72,gender:'여',room:'ICU-102',base:{temperature:37.0,heartRate:82,respRate:17,sysBloodPress:124,spO2:97}},
+{id:'P003',name:'박민준',age:55,gender:'남',room:'ICU-103',base:{temperature:39.0,heartRate:124,respRate:29,sysBloodPress:82,spO2:91}},
+{id:'P004',name:'최수진',age:64,gender:'여',room:'ICU-104',base:{temperature:36.7,heartRate:76,respRate:16,sysBloodPress:132,spO2:98}},
+{id:'P005',name:'손재훈',age:71,gender:'남',room:'ICU-105',base:{temperature:38.4,heartRate:112,respRate:25,sysBloodPress:96,spO2:93}},
+{id:'P006',name:'정미라',age:59,gender:'여',room:'ICU-106',base:{temperature:37.4,heartRate:91,respRate:21,sysBloodPress:116,spO2:96}},
+{id:'P007',name:'강두영',age:66,gender:'남',room:'ICU-107',base:{temperature:38.6,heartRate:118,respRate:27,sysBloodPress:90,spO2:92}},
+{id:'P008',name:'임순희',age:73,gender:'여',room:'ICU-108',base:{temperature:36.9,heartRate:79,respRate:18,sysBloodPress:126,spO2:97}},
+{id:'P009',name:'조형호',age:61,gender:'남',room:'ICU-109',base:{temperature:38.0,heartRate:104,respRate:24,sysBloodPress:104,spO2:94}},
+{id:'P010',name:'유소영',age:58,gender:'여',room:'ICU-110',base:{temperature:36.6,heartRate:73,respRate:15,sysBloodPress:129,spO2:99}}
+];
+let selectedPatientId='P001', chartMetric='risk', autoTimer=null;
+let state={}, feedbackList=[{patientId:'P001',doctor:'김의사',date:'2026.09.11',text:'혈압과 호흡수 추이 지속 관찰'}], alarmLog=[];
+
+function clamp(v,min,max){return Math.max(min,Math.min(max,v))}
+function jitter(base,key){const spread={temperature:.25,heartRate:6,respRate:3,sysBloodPress:8,spO2:2}[key];let v=base+(Math.random()-.5)*spread*2;if(key==='temperature')return Math.round(v*10)/10;return Math.round(v)}
+function calcRisk(v){let s=5; if(v.temperature>=38)s+=18; if(v.temperature<36)s+=12; if(v.heartRate>100)s+=18; if(v.heartRate>120)s+=8; if(v.respRate>20)s+=18; if(v.respRate>=25)s+=8; if(v.sysBloodPress<100)s+=18; if(v.sysBloodPress<90)s+=10; if(v.spO2<95)s+=12; if(v.spO2<92)s+=7; return clamp(Math.round(s),0,100)}
+function getStatus(score){return score>=70?'위험':score>=45?'주의':'정상'}
+function statusClass(status){return status==='위험'?'danger':status==='주의'?'warning':'success'}
+function generateTrend(baseVitals){const out=[];let v={...baseVitals};for(let i=0;i<24;i++){v={temperature:jitter(v.temperature,'temperature'),heartRate:jitter(v.heartRate,'heartRate'),respRate:jitter(v.respRate,'respRate'),sysBloodPress:jitter(v.sysBloodPress,'sysBloodPress'),spO2:jitter(v.spO2,'spO2')};out.push({...v,risk:calcRisk(v)});}return out}
+function init(){patients.forEach(p=>{const vitals={...p.base};const risk=calcRisk(vitals);const trend=generateTrend(vitals);state[p.id]={vitals,risk,prevRisk:Math.max(0,risk-Math.round(Math.random()*12)),trend};});updateTime();renderAll();setAutoRefresh();}
+
+function getReasons(v){const r=[];if(v.sysBloodPress<90)r.push(`수축기 혈압이 ${v.sysBloodPress} mmHg로 매우 낮아 저혈압 위험 신호가 있습니다.`);else if(v.sysBloodPress<100)r.push(`수축기 혈압이 ${v.sysBloodPress} mmHg로 낮은 편입니다.`);if(v.respRate>20)r.push(`호흡수가 ${v.respRate}/min으로 증가했습니다.`);if(v.heartRate>100)r.push(`심박수가 ${v.heartRate} bpm으로 빠릅니다.`);if(v.temperature>=38)r.push(`체온이 ${v.temperature}°C로 상승했습니다.`);if(v.spO2<95)r.push(`SpO₂가 ${v.spO2}%로 낮아졌습니다.`);if(!r.length)r.push('현재 주요 생체신호가 설정된 정상 범위에서 비교적 안정적입니다.');return r.slice(0,4)}
+function shapValues(v){return [
+['혈압',v.sysBloodPress<100?Math.min(30,(100-v.sysBloodPress)*1.2):3],['호흡수',v.respRate>20?Math.min(28,(v.respRate-20)*2.5):4],['심박수',v.heartRate>100?Math.min(26,(v.heartRate-100)*1.1):5],['체온',v.temperature>=38?Math.min(22,(v.temperature-37.5)*10):4],['SpO₂',v.spO2<95?Math.min(24,(95-v.spO2)*4):3],['WBC(모의)',8+Math.random()*8],['크레아티닌(모의)',5+Math.random()*9]
+].sort((a,b)=>b[1]-a[1])}
+function guideFor(status){if(status==='위험')return '<strong>🔴 위험 단계 — 의료진 즉시 확인 필요</strong><p>생체신호 재확인, 담당 의료진 보고 및 추가적인 임상 평가를 권고합니다. 이 안내는 진단이나 치료 지시가 아닙니다.</p>';if(status==='주의')return '<strong>🟡 주의 단계 — 관찰 강화</strong><p>생체신호를 재확인하고 변화 추이를 면밀히 관찰하세요. 상태가 악화되면 의료진 확인이 필요합니다.</p>';return '<strong>🟢 정상 단계 — 지속 모니터링</strong><p>현재 설정된 기준에서는 비교적 안정적입니다. 정기적인 모니터링을 지속하세요.</p>'}
+
+const ACTIONS_BY_STATUS={
+'위험':{cls:'danger',title:'🚨 권장 조치 — 즉시 개입 필요',items:['즉시 혈액배양 검사 시행','1시간 이내 광범위 항생제 투여','젖산(Lactate) 수치 재확인','주치의 / 당직의 즉시 호출']},
+'주의':{cls:'warning',title:'⚠️ 권장 조치 — 관찰 강화 필요',items:['활력징후 15~30분 간격 재측정','혈액검사(WBC, CRP, Lactate) 오더 고려','수액 공급 상태 점검','환자 상태 지속 관찰 및 재평가']},
+'정상':{cls:'success',title:'✅ 권장 조치 — 정기 모니터링',items:['4시간 간격 정기 활력징후 측정','특이사항 발생 시 즉시 재평가']},
+};
+function renderActionBox(status){const a=ACTIONS_BY_STATUS[status];const box=document.getElementById('actionBox');box.className=`action-box ${a.cls}`;box.innerHTML=`<h4>${a.title}</h4><ul>${a.items.map(x=>`<li>${x}</li>`).join('')}</ul>`}
+
+function renderPatientList(){let list=[...patients];const q=document.getElementById('searchInput').value.trim().toLowerCase();if(q)list=list.filter(p=>(p.name+p.room+p.id).toLowerCase().includes(q));const sf=document.getElementById('statusFilterSelect').value;if(sf!=='전체')list=list.filter(p=>getStatus(state[p.id].risk)===sf);const mode=document.getElementById('sortSelect').value;if(mode==='risk')list.sort((a,b)=>state[b.id].risk-state[a.id].risk);if(mode==='rise')list.sort((a,b)=>(state[b.id].risk-state[b.id].prevRisk)-(state[a.id].risk-state[a.id].prevRisk));if(mode==='room')list.sort((a,b)=>a.room.localeCompare(b.room));const el=document.getElementById('patientList');if(!list.length){el.innerHTML='<div class="empty">조건에 맞는 환자가 없습니다.</div>';return;}el.innerHTML=list.map(p=>{const s=state[p.id],status=getStatus(s.risk),rise=s.risk-s.prevRisk;return `<button class="patient-button ${p.id===selectedPatientId?'active':''}" onclick="selectPatient('${p.id}')"><div class="patient-top"><span class="patient-name">${p.name}</span><span><span class="badge ${statusClass(status)}">${status}</span>${rise>=8?'<span class="trend-up">▲ 급상승</span>':''}</span></div><div class="patient-info">${p.room} · ${p.age}세 · 위험도 ${s.risk}%</div></button>`}).join('')}
+function renderDashboard(){const p=patients.find(x=>x.id===selectedPatientId),s=state[p.id],v=s.vitals,status=getStatus(s.risk),diff=s.risk-s.prevRisk;document.getElementById('patientName').textContent=`${p.name} · ${p.room}`;document.getElementById('patientInfo').textContent=`${p.age}세 · ${p.gender} · 환자 ID ${p.id}`;document.getElementById('riskScore').textContent=s.risk;document.getElementById('riskScore').style.color=status==='위험'?'var(--red)':status==='주의'?'var(--amber)':'var(--green)';document.getElementById('scoreChange').textContent=`이전 대비 ${diff>=0?'+':''}${diff}%`;document.getElementById('scoreChange').style.color=diff>0?'var(--red)':diff<0?'var(--green)':'var(--muted)';const ind=document.getElementById('statusIndicator');ind.textContent=`상태: ${status}`;ind.className=`status-indicator ${statusClass(status)}`;const pb=document.getElementById('priorityBadge');pb.textContent=diff>=8?'급격한 상승':'모니터링';pb.className=`badge ${diff>=8?'danger':statusClass(status)}`;document.getElementById('reasonList').innerHTML=getReasons(v).map(x=>`<li>${x}</li>`).join('');document.getElementById('guideBox').innerHTML=guideFor(status);renderActionBox(status);renderVitals(v);renderShap(v);renderChart();renderFeedback();renderAlarmLog()}
+function renderVitals(v){const defs=[['temperature','체온'],['heartRate','심박'],['respRate','호흡'],['sysBloodPress','SBP'],['spO2','SpO₂']];document.getElementById('vitalsGrid').innerHTML=defs.map(([k,l])=>{const [lo,hi]=ranges[k],ab=v[k]<lo||v[k]>hi;return `<div class="vital-card ${ab?'abnormal':''}"><div class="vital-label">${l}</div><div class="vital-value">${v[k]}${units[k]}</div><div class="vital-range">참고 범위 ${lo}–${hi}${units[k]}</div></div>`}).join('')}
+function renderShap(v){document.getElementById('shapAnalysis').innerHTML=shapValues(v).map(([n,val])=>`<div class="shap-row"><div>${n}</div><div class="bar-bg"><div class="bar-fill" style="width:${Math.min(100,val*3.3)}%"></div></div><div class="shap-val">${val.toFixed(1)}</div></div>`).join('')}
+function renderTabs(){const keys=['risk','temperature','heartRate','respRate','sysBloodPress','spO2'];document.getElementById('chartTabs').innerHTML=keys.map(k=>`<button class="tab ${chartMetric===k?'active':''}" onclick="setMetric('${k}')">${labels[k]}</button>`).join('')}
+function setMetric(k){chartMetric=k;renderChart()}
+function renderChart(){renderTabs();const data=state[selectedPatientId].trend.map(x=>x[chartMetric]);let min=Math.min(...data),max=Math.max(...data);if(max===min)max=min+1;const pad=(max-min)*.15||1;min-=pad;max+=pad;const W=900,H=250,M=28;const pts=data.map((val,i)=>{const x=M+i*(W-2*M)/(data.length-1),y=H-M-(val-min)/(max-min)*(H-2*M);return [x,y,val]});let path=pts.map((p,i)=>`${i?'L':'M'} ${p[0].toFixed(1)} ${p[1].toFixed(1)}`).join(' ');let circles=pts.map(p=>`<circle cx="${p[0]}" cy="${p[1]}" r="3" fill="var(--blue)"><title>${p[2]}${units[chartMetric]||'%'}</title></circle>`).join('');let grid='';for(let i=0;i<5;i++){let y=M+i*(H-2*M)/4;let val=(max-i*(max-min)/4).toFixed(chartMetric==='temperature'?1:0);grid+=`<line x1="${M}" y1="${y}" x2="${W-M}" y2="${y}" stroke="var(--line)" stroke-width="1"/><text x="2" y="${y+3}" font-size="10" fill="var(--muted)">${val}</text>`}document.getElementById('trendSvg').innerHTML=`${grid}<path d="${path}" fill="none" stroke="var(--blue)" stroke-width="4" vector-effect="non-scaling-stroke"/>${circles}`;document.getElementById('chartLabel').textContent=labels[chartMetric]}
+function renderFeedback(){const f=feedbackList.filter(x=>x.patientId===selectedPatientId);document.getElementById('feedbackList').innerHTML=f.length?f.slice().reverse().map(x=>`<div class="feedback-item"><div class="feedback-meta">${x.doctor} · ${x.date}</div>${x.text}</div>`).join(''):'<div class="empty">등록된 피드백이 없습니다.</div>'}
+function addFeedback(){const input=document.getElementById('feedbackInput');if(!input.value.trim())return;feedbackList.push({patientId:selectedPatientId,doctor:'현재의사',date:new Date().toLocaleString('ko-KR'),text:input.value.trim()});alarmLog.push({id:Date.now(),patientId:selectedPatientId,time:new Date().toLocaleTimeString('ko-KR'),message:'의료진 피드백이 저장되었습니다.',level:'success',acked:false});input.value='';renderFeedback();renderAlarmLog()}
+function renderAlarmLog(){const items=alarmLog.filter(a=>!a.patientId||a.patientId===selectedPatientId).slice().reverse();document.getElementById('alarmList').innerHTML=items.length?items.map(a=>`<div class="alarm ${a.level}-border ${a.acked?'acked':''}"><div class="alarm-head"><span>${a.time}</span><strong>${a.level==='danger'?'위험':a.level==='warning'?'주의':'정보'}</strong></div><div class="alarm-msg">${a.message}</div><div class="alarm-actions">${a.acked?'<span style="font-size:10px">확인됨</span>':`<button class="ack" onclick="ackAlarm(${a.id})">확인 처리</button>`}</div></div>`).join(''):'<div class="empty">알람이 없습니다.</div>'}
+function ackAlarm(id){const a=alarmLog.find(x=>x.id===id);if(a)a.acked=true;renderAlarmLog()}
+function addManualAlarm(){alarmLog.push({id:Date.now(),patientId:selectedPatientId,time:new Date().toLocaleTimeString('ko-KR'),message:'테스트용 모니터링 알람이 생성되었습니다.',level:'warning',acked:false});renderAlarmLog()}
+function selectPatient(id){selectedPatientId=id;renderAll()}
+function refreshData(manual=false){patients.forEach(p=>{const s=state[p.id];s.prevRisk=s.risk;const old={...s.vitals};s.vitals={temperature:jitter(old.temperature,'temperature'),heartRate:jitter(old.heartRate,'heartRate'),respRate:jitter(old.respRate,'respRate'),sysBloodPress:jitter(old.sysBloodPress,'sysBloodPress'),spO2:jitter(old.spO2,'spO2')};s.risk=calcRisk(s.vitals);s.trend.push({...s.vitals,risk:s.risk});if(s.trend.length>24)s.trend.shift();const rise=s.risk-s.prevRisk;if(rise>=8)alarmLog.push({id:Date.now()+Math.random(),patientId:p.id,time:new Date().toLocaleTimeString('ko-KR'),message:`${p.name} 환자 위험도 급상승 (${s.prevRisk}% → ${s.risk}%)`,level:'danger',acked:false});else if(s.risk>=70&&s.prevRisk<70)alarmLog.push({id:Date.now()+Math.random(),patientId:p.id,time:new Date().toLocaleTimeString('ko-KR'),message:`${p.name} 환자가 위험 단계에 진입했습니다.`,level:'danger',acked:false});});updateTime();renderAll();if(manual)console.log('수동 갱신 완료')}
+function updateTime(){document.getElementById('updateTime').textContent=`마지막 업데이트: ${new Date().toLocaleString('ko-KR')}`}
+function setAutoRefresh(){if(autoTimer)clearInterval(autoTimer);if(document.getElementById('autoRefresh').checked){const sec=Number(document.getElementById('intervalSelect').value);autoTimer=setInterval(()=>refreshData(false),sec*1000)}}
+function toggleTheme(){document.body.classList.toggle('dark');const dark=document.body.classList.contains('dark');document.getElementById('themeBtn').textContent=dark?'☀️ 라이트모드':'🌙 다크모드';localStorage.setItem('sepsis-theme',dark?'dark':'light')}
+function renderAll(){renderPatientList();renderDashboard()}
+if(localStorage.getItem('sepsis-theme')==='dark'){document.body.classList.add('dark');document.addEventListener('DOMContentLoaded',()=>document.getElementById('themeBtn').textContent='☀️ 라이트모드')}
+init();
+</script>
+</body>
+</html>
